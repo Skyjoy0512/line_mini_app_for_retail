@@ -1,4 +1,4 @@
-service: your-name-line-member-card
+service: ryokan1130-line-member-card
 
 frameworkVersion: '3'
 custom:
@@ -49,6 +49,14 @@ provider:
           Resource:
             - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.app.USER_TABLE}"
             - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.app.VISIT_TABLE}"
+
+      # S3アクセス許可を追加
+        - Effect: Allow
+          Action:
+            - s3:PutBucketPolicy
+            - s3:GetBucketPolicy  
+          Resource: 
+            - arn:aws:s3:::YOUR_S3_BUCKET_NAME            
 package:
   exclude:
     - backend/node_modules/**
@@ -69,10 +77,14 @@ resources:
     S3Storage:
       Type: 'AWS::S3::Bucket'
       Properties:
-        AccessControl: PublicRead
         BucketName: '${self:custom.app.PUBLIC_BUCKET}'
         WebsiteConfiguration:
           IndexDocument: index.html
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          IgnorePublicAcls: true
+          BlockPublicPolicy: false
+          RestrictPublicBuckets: true
     StaticSiteS3BucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
